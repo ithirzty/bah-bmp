@@ -229,6 +229,25 @@ struct BMP {
         }
     }
 
+
+    line(x1 int, y1 int, x2 int, y2 int, r int, g int, b int) {
+        p = new pixel
+        p.r = r
+        p.g = g
+        p.b = b
+
+        yLen float = y2 - y1
+        xLen float = x2 - x1
+        stiff float = yLen / xLen
+
+        r = x1; for r <= x2 {
+            fr float = r-x1
+            xmult int = stiff * fr
+            this.data[this.m.index(r, xmult+y1)] = p
+            r = r + 1
+        }
+    }
+
 }
 
 //Used for making an empty BMP image.

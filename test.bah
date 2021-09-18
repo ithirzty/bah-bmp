@@ -21,6 +21,9 @@ main(args []cpstring) int {
 
     img3.rect(0,0, 25,25, 255,0,255) //makes a rectangle from 0,0 to 25,25 that is magenta
     img3.rect(20,20, 40,40, 123,43,23) //makes a rectangle from 20,20 to 40,40 that is brown
+    img3.line(0,0, 20,20, 0,255,0) //draws a line joinning the two rectangles top left corner
+    img3.line(0,25, 20,40, 0,255,0) //draws a line joinning the two rectangles top right corner
+    img3.line(25,0, 40,20, 0,255,0) //draws a line joinning the two rectangles bottom left corner
 
     img3.write("./test3.bmp") //writes the image to test3.bmp
 
