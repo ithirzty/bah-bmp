@@ -2,15 +2,27 @@
 #include "bmp.bah"
 
 main(args []cpstring) int {
-    img = BMPimage(2,2) //create a 2 by 2 image
-    
+    img = BMPimage(2,2) //create a 2 by 2 bitmap image
     //           x y  r   g   b
     img.setPixel(0,0, 0,  0,  255) //top left pixel: blue
     img.setPixel(0,1, 0,  255,0) //top right pixel: green
     img.setPixel(1,0, 255,0,  0) //bottom left pixel: red
     img.setPixel(1,1, 255,255,255) //bottom right pixel: white
-
     img.write("./test.bmp") //writes the image to test.bmp
+
+
+    img2 = BMP{} //instanciates a new bitmap image
+    img2.read("./test.bmp") //reads the created above image
+    img2.setPixel(1,1,255,255,0) //bottom right pixel: yellow
+    img2.write("./test2.bmp") //writes the image to test2.bmp
+
+
+    img3 = BMPimage(50,50) //create a 50 by 50 bitmap image
+
+    img3.rect(0,0, 25,25, 255,0,255) //makes a rectangle from 0,0 to 25,25 that is magenta
+    img3.rect(20,20, 40,40, 123,43,23) //makes a rectangle from 20,20 to 40,40 that is brown
+
+    img3.write("./test3.bmp") //writes the image to test3.bmp
 
     return 0
 }

@@ -104,7 +104,7 @@ struct BMP {
         }
 
         //parsing data
-        this.m = matrix(this.width-1)
+        this.m = matrix(this.width)
         this.data = []pixel*
 
         i = 0; for i < this.width * this.height {
@@ -118,6 +118,7 @@ struct BMP {
         padding = padding * 3
         padding = padding % 4
         this.padding = 4 - padding
+
         for row >= 0 {
             col = 0; for col < this.width {
                 p = new pixel
@@ -190,10 +191,11 @@ struct BMP {
                 p = this.data[this.m.index(row, col)]
                 if p == null {
                     fs.writePtr(&z, 3)
+                } else {
+                    fs.writePtr(&p.b, 1)
+                    fs.writePtr(&p.g, 1)
+                    fs.writePtr(&p.r, 1)
                 }
-                fs.writePtr(&p.b, 1)
-                fs.writePtr(&p.g, 1)
-                fs.writePtr(&p.r, 1)
                 col = col + 1
             }
             fs.writePtr(&z, this.padding)
@@ -211,6 +213,20 @@ struct BMP {
         p.g = g
         p.b = b
         this.data[this.m.index(x,y)] = p
+    }
+
+    rect(x1 int, y1 int, x2 int, y2 int, r int, g int, b int) {
+        p = new pixel
+        p.r = r
+        p.g = g
+        p.b = b
+        r = x1; for r <= x2 {
+            c = y1; for c <= y2 {
+                this.data[this.m.index(r,c)] = p
+                c = c + 1
+            }
+            r = r + 1
+        }
     }
 
 }
