@@ -1,0 +1,234 @@
+#include "iostream.bah"
+#include "matrix.bah"
+#include "rope.bah"
+
+//Used for converting a binary string to an int.
+charArrToInt(f []char, offset int, size int) int {
+    arr = []char
+    i=0; for i < size {
+        arr[i] = f[i+offset]
+        i = i + 1
+    }
+    
+    arrPtr int* = arrAsStr(arr)
+    return *arrPtr
+}
+
+//Used for converting an int to binary, s being the number of bits.
+intToCharArr(i int, s int) []char {
+    str cpstring = memoryAlloc(SIZE_OF_INT+1)
+    memcpy(str, &i, SIZE_OF_INT)
+    sarr = strAsArr(str)
+    arr = []char
+    j=0; for j < s {
+        arr[j] = sarr[j]
+        j = j + 1
+    }
+    return arr
+}
+
+struct pixel {
+    r: int
+    g: int
+    b: int
+
+    print() {
+        println("["+intToStr(this.r)+" "+intToStr(this.g)+" "+intToStr(this.b)+"]")
+    }
+
+}
+
+//A wrapper for handling BMP images.
+struct BMP {
+    //BMP header
+    type: cpstring
+    size: int
+    startPtr: int
+
+    //DIB header
+    height: int
+    width: int
+    bitsPerPixel: int
+    comprAlgo: int
+    dataSize: int
+    ppmhRes: int
+    ppmvRes: int
+    nbColors: int
+    impColors: int
+
+    //Image data
+    m: matrix*
+    data: []pixel*
+    padding: int
+
+    //Used to read a BMP image from a file.
+    read(fileName cpstring) bool {
+        fm = fileMap{}
+        fstr = fm.open(fileName)
+        if fm.isValid() == 0 {
+            return false
+        }
+        f = strAsArr(fstr)
+        fm.close()
+
+        
+        //parsing header
+        type = []char{f[0], f[1]}
+        this.type = arrToStr(type)
+
+        if this.type != "BM" {
+            println("Cannot parse image that is not Windows Bitmap")
+            return false
+        }
+        
+        this.size = charArrToInt(f, 2, 4)
+        
+        this.startPtr = charArrToInt(f, 10, 4)
+
+        DIBsize = charArrToInt(f, 14, 4)
+
+        if DIBsize == 12 {
+            this.width = charArrToInt(f, 18, 2)
+            this.height = charArrToInt(f, 20, 2)
+            this.bitsPerPixel = charArrToInt(f, 24, 2)
+        } else {
+            this.width = charArrToInt(f, 18, 4)
+            this.height = charArrToInt(f, 22, 4)
+            this.bitsPerPixel = charArrToInt(f, 28, 2)
+            this.comprAlgo = charArrToInt(f, 30, 4)
+            this.dataSize = charArrToInt(f, 34, 4)
+            this.ppmhRes = charArrToInt(f, 38, 4)
+            this.ppmvRes = charArrToInt(f, 42, 4)
+            this.nbColors = charArrToInt(f, 46, 4)
+            this.impColors = charArrToInt(f, 50, 4)
+        }
+
+        //parsing data
+        this.m = matrix(this.width-1)
+        this.data = []pixel*
+
+        i = 0; for i < this.width * this.height {
+            this.data[i] = null
+            i = i + 1
+        }
+
+        row = this.height - 1
+        index = this.startPtr
+        padding = this.width
+        padding = padding * 3
+        padding = padding % 4
+        this.padding = 4 - padding
+        for row >= 0 {
+            col = 0; for col < this.width {
+                p = new pixel
+                p.b = charArrToInt(f, index, 1)
+                index = index + 1
+                p.g = charArrToInt(f, index, 1)
+                index = index + 1
+                p.r = charArrToInt(f, index, 1)
+                index = index + 1
+                this.data[this.m.index(row, col)] = p
+                col = col + 1
+            }
+            index = index + this.padding
+            row = row - 1
+        }
+
+        return true
+    }
+
+    //Used to write the BMP image to a file.
+    write(fileName cpstring) {
+        fs = fileStream{}
+        fs.open(fileName, "wb")
+        fs.writeFile("BM")
+        size = this.width * 3
+        size = size + this.padding
+        size = size * this.height
+        size = size + 54
+        //Total size of the file
+        fs.writePtr(&size, 4)
+        //Not used (application specific headers)
+        z = 0
+        fs.writePtr(&z, 2)
+        fs.writePtr(&z, 2)
+        //Data start ptr
+        startPtr = 54
+        fs.writePtr(&startPtr, 4)
+        //Len of dib header
+        dibLen = 40
+        fs.writePtr(&dibLen, 4)
+        //Width of image
+        fs.writePtr(&this.width, 4)
+        //Height of image
+        fs.writePtr(&this.height, 4)
+        //Number of color plane
+        nbPlane = 1
+        fs.writePtr(&nbPlane, 2)
+        //Number of bytes per pixel
+        nbbpp = 24
+        fs.writePtr(&nbbpp, 2)
+        //Compression algorithm
+        fs.writePtr(&z, 4)
+        //Size without headers
+        size = size - 54
+        fs.writePtr(&size, 4)
+        //DPI of the image
+        dpi = 2835
+        fs.writePtr(&dpi, 4)
+        fs.writePtr(&dpi, 4)
+        //Number of colors in the palette
+        fs.writePtr(&z, 4)
+        //Important colors
+        fs.writePtr(&z, 4)
+
+        //Data
+        row = this.height - 1
+        for row >= 0 {
+            col = 0
+            for col < this.width {
+                p = this.data[this.m.index(row, col)]
+                if p == null {
+                    fs.writePtr(&z, 3)
+                }
+                fs.writePtr(&p.b, 1)
+                fs.writePtr(&p.g, 1)
+                fs.writePtr(&p.r, 1)
+                col = col + 1
+            }
+            fs.writePtr(&z, this.padding)
+            row = row - 1
+        }
+
+        
+
+        fs.close()
+    }
+
+    setPixel(x int, y int, r int, g int, b int) {
+        p = new pixel
+        p.r = r
+        p.g = g
+        p.b = b
+        this.data[this.m.index(x,y)] = p
+    }
+
+}
+
+//Used for making an empty BMP image.
+BMPimage(w int, h int) BMP* {
+    img = new BMP
+    img.width = w
+    img.height = h
+    img.m = matrix(w)
+    img.data = []pixel*
+    i=0; for i < w*h {
+        img.data[i] = null
+        i = i + 1
+    }
+    padding = w
+    padding = padding * 3
+    padding = padding % 4
+    img.padding = 4 - padding
+    return img
+}

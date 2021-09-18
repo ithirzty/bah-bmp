@@ -1,0 +1,16 @@
+#include "iostream.bah"
+#include "bmp.bah"
+
+main(args []cpstring) int {
+    img = BMPimage(2,2) //create a 2 by 2 image
+    
+    //           x y  r   g   b
+    img.setPixel(0,0, 0,  0,  255) //top left pixel: blue
+    img.setPixel(0,1, 0,  255,0) //top right pixel: green
+    img.setPixel(1,0, 255,0,  0) //bottom left pixel: red
+    img.setPixel(1,1, 255,255,255) //bottom right pixel: white
+
+    img.write("./test.bmp") //writes the image to test.bmp
+
+    return 0
+}
