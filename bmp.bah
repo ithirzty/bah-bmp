@@ -27,15 +27,15 @@ intToCharArr(i int, s int) []char {
     return arr
 }
 
+//A simple representation of a single RGB pixel.
+// r: red value
+// g: green value
+// b: blue value
+// All of the above go from 0 to 255.
 struct pixel {
     r: int
     g: int
     b: int
-
-    print() {
-        println("["+intToStr(this.r)+" "+intToStr(this.g)+" "+intToStr(this.b)+"]")
-    }
-
 }
 
 //A wrapper for handling BMP images.
@@ -207,6 +207,8 @@ struct BMP {
         fs.close()
     }
 
+    //Used for setting a single pixel a the x,y coords.
+    //The r,g,b parameters are used to specify the point color.
     setPixel(x int, y int, r int, g int, b int) {
         p = new pixel
         p.r = r
@@ -215,6 +217,8 @@ struct BMP {
         this.data[this.m.index(x,y)] = p
     }
 
+    //Used for drawing a rectangle from the first point (x1, y1) to the second point (x2,y2).
+    //The r,g,b parameters are used to specify the rectangle color.
     rect(x1 int, y1 int, x2 int, y2 int, r int, g int, b int) {
         p = new pixel
         p.r = r
@@ -229,7 +233,8 @@ struct BMP {
         }
     }
 
-
+    //Used for drawing a line from the first point (x1, y1) to the second point (x2, y2).
+    //The r,g,b parameters are used to specify the line color.
     line(x1 int, y1 int, x2 int, y2 int, r int, g int, b int) {
         p = new pixel
         p.r = r
@@ -248,6 +253,7 @@ struct BMP {
         }
     }
 
+    //Used for inserting another BMP image at the specified coords.
     insertBMP(x int, y int, img BMP*) {
         rowMax = x + img.width
         colMax = y + img.height
@@ -257,7 +263,10 @@ struct BMP {
         
         row=x;for row < rowMax {
             col=y; for col < colMax {
-                this.data[this.m.index(row,col)] = img.data[img.m.index(row-x, col-y)]
+                p = img.data[img.m.index(row-x, col-y)]
+                if p != null {
+                    this.data[this.m.index(row,col)] = p
+                }
                 col = col + 1
             }
             row = row + 1
@@ -282,6 +291,5 @@ BMPimage(w int, h int) BMP* {
     padding = padding * 3
     padding = padding % 4
     img.padding = padding
-    println("img padding '"+intToStr(img.padding)+"'")
     return img
 }
