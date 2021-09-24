@@ -24,7 +24,7 @@ main(args []cpstring) int {
     img3.line(0,0, 20,20, 0,255,0) //draws a line joinning the two rectangles top left corner
     img3.line(0,25, 20,40, 0,255,0) //draws a line joinning the two rectangles top right corner
     img3.line(25,0, 40,20, 0,255,0) //draws a line joinning the two rectangles bottom left corner
-
+    img3.insertBMP(39,39, img) // inserts the created above bitmap to the bottom right of the brown square
     img3.write("./test3.bmp") //writes the image to test3.bmp
 
     return 0
