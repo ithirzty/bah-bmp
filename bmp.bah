@@ -46,7 +46,7 @@ struct BMP {
     //BMP header
     type: cpstring
     size: int
-    startPtr: int
+    startPtr: int = 54
 
     //DIB header
     height: int
@@ -58,6 +58,7 @@ struct BMP {
     ppmvRes: int
     nbColors: int
     impColors: int
+    dibLen: int = 40
 
     //Image data
     m: matrix*
@@ -87,7 +88,6 @@ struct BMP {
         this.size = charArrToInt(f, 2, 4)
         
         this.startPtr = charArrToInt(f, 10, 4)
-
         DIBsize = charArrToInt(f, 14, 4)
 
         if DIBsize == 12 {
@@ -117,7 +117,7 @@ struct BMP {
         padding = this.width
         padding = padding * 3
         padding = padding % 4
-        this.padding = 4 - padding
+        this.padding = padding
 
         for row >= 0 {
             col = 0; for col < this.width {
@@ -273,6 +273,30 @@ struct BMP {
         }
     }
 
+    //Used for making a subset of a BMP image.
+    //x1 topper x coordinate
+    //y1 means the leftest y coordinate
+    subBMP(x1 int, y1 int, x2 int, y2 int) BMP* {
+        img = new BMP
+        *img = *this
+        img.width = y2 - y1
+        img.height = x2 - x1
+        img.m = matrix(img.width)
+		img.data = []pixel*
+        allocateArray(img.data, img.width * img.height)
+        row=x1; for row < x2 {
+            col=y1; for col < y2 {
+                p = this.data[this.m.index(row, col)]
+                if p != null {
+                    img.data[img.m.index(row-x1, col-y2)] = p
+                }
+                col = col + 1
+            }
+            row = row + 1
+        }
+        return img
+    }
+
 }
 
 //Used for making an empty BMP image.
@@ -282,6 +306,7 @@ BMPimage(w int, h int) BMP* {
     img.height = h
     img.m = matrix(w)
     img.data = []pixel*
+
     allocateArray(img.data, w*h)
     // i=0; for i < w*h {
     //     img.data[i] = null

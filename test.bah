@@ -27,5 +27,14 @@ main(args []cpstring) int {
     img3.insertBMP(39,39, img) // inserts the created above bitmap to the bottom right of the brown square
     img3.write("./test3.bmp") //writes the image to test3.bmp
 
+
+    img4 = BMP{}
+    img4.read("assets/sample_1920×1280.bmp")
+    img4.insertBMP(615, 935, img3)
+    img4.write("test4.bmp")
+
+    img5 = img4.subBMP(600, 900, 900, 1200) //makes a selection in img4
+    img5.write("./test5.bmp") //writes the selection to 'test5.bmp'
+    
     return 0
 }
