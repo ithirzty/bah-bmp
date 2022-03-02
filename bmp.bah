@@ -257,8 +257,12 @@ struct BMP {
     insertBMP(x int, y int, img BMP*) {
         rowMax = x + img.width
         colMax = y + img.height
-        if rowMax > this.width {rowMax = this.width}
-        if colMax > this.height {colMax = this.height}
+        if rowMax > this.width {
+            rowMax = this.width
+        }
+        if colMax > this.height {
+            colMax = this.height
+        }
         
         
         row=x;for row < rowMax {
